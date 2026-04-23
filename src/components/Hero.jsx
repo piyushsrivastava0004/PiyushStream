@@ -3,14 +3,33 @@ import { useNavigate } from 'react-router-dom'
 import { Play, Info, Star } from 'lucide-react'
 import { BACKDROP_URL, POSTER_URL, getTitle, getYear, getRating, getMediaType } from '../api/tmdb'
 
-export default function Hero({ items = [] }) {
+export default function Hero({ items = [], loading = false, error = '' }) {
   const [current, setCurrent] = useState(0)
   const navigate = useNavigate()
 
-  if (!items || items.length === 0) {
+  if (loading) {
     return (
       <div className="h-[85vh] bg-surface-2 flex items-center justify-center">
         <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="h-[85vh] min-h-[500px] bg-surface-2 flex items-center justify-center px-6 text-center">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Content not available</h2>
+          <p className="text-gray-400 max-w-xl mx-auto mb-5">
+            {error || 'No trending data was returned from TMDB for this request.'}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-violet-600 hover:bg-violet-700 px-5 py-2.5 rounded-lg font-semibold transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     )
   }

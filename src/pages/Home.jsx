@@ -11,10 +11,12 @@ export default function Home() {
   const [topRatedTV, setTopRatedTV] = useState([])
   const [nowPlaying, setNowPlaying] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
+        setError('')
         const [t, pm, trm, ptv, trtv, np] = await Promise.all([
           getTrending('week'),
           getPopularMovies(),
@@ -31,6 +33,14 @@ export default function Home() {
         setNowPlaying(np.data.results || [])
       } catch (err) {
         console.error('Failed to fetch home data:', err)
+        const status = err?.response?.status
+        if (status === 401) {
+          setError('TMDB API key is invalid. Update VITE_TMDB_API_KEY and redeploy.')
+        } else if (status === 429) {
+          setError('TMDB rate limit reached. Please try again in a few minutes.')
+        } else {
+          setError('Unable to load content right now. Please refresh and try again.')
+        }
       } finally {
         setLoading(false)
       }
@@ -41,7 +51,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <Hero items={trending.slice(0, 5)} />
+      <Hero items={trending.slice(0, 5)} loading={loading} error={error} />
 
       {/* Content rows */}
       <div className="pt-8">
